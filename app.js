@@ -13,6 +13,79 @@ const
 const render = require("./lib/htmlRenderer");
 
 
+function init() {
+  inquirer.prompt([
+    {
+      type: "list",
+      message: "What type of employee would you like to add?",
+      choices: [
+        "Engineer",
+        "Intern",
+        "Manager"
+      ],
+      name: "employeeType"
+    }
+  ]).then(({employeeType}) => {
+    getEmployeeInfo(employeeType)
+  })
+}
+
+
+function getEmployeeInfo(employeeType) {
+  const prompts = questions["Common"]
+  prompts.push(questions[employeeType])
+
+  inquirer.prompt(prompts).then(response => {
+      let employee = employeeBuilder[employeeType](response)
+      console.log(employee)
+  })
+}
+
+
+const questions = {
+  Common: [
+    {
+      message: "What is the employee's name?",
+      name: "name"
+    },
+    {
+      message: "What is the employee's ID number?",
+      name: "id"
+    },
+    {
+      message: "What is the employee's email address?",
+      name: "email"
+    }
+  ],
+  Engineer: {
+    message: "What is the employee's Github username?",
+    name: "github"
+  },
+  Intern: {
+    message: "What school is the employee from?",
+    name: "school"
+  },
+  Manager: {
+    message: "What is the employee's office number?",
+    name: "officeNumber"
+  }
+}
+
+
+const employeeBuilder = {
+  Engineer({name, id, email, github}) {
+    return new Engineer(name, id, email, github)
+  },
+
+  Intern({name, id, email, school}) {
+    return new Intern(name, id, email, school)
+  },
+
+  Manager({name, id, email, officeNumber}) {
+    return new Manager(name, id, email, officeNumber)
+  }
+}
+
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
@@ -35,3 +108,5 @@ const render = require("./lib/htmlRenderer");
 // for further information. Be sure to test out each class and verify it generates an
 // object with the correct structure and methods. This structure will be crucial in order
 // for the provided `render` function to work! ```
+
+init();
