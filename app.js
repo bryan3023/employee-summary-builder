@@ -64,8 +64,29 @@ function promptContinue() {
       promptEmployeeType()
     } else {
       console.log(employees)
+      saveTeamReport(employees)
     }
   })
+}
+
+function saveTeamReport(employees) {
+  createFolder(OUTPUT_DIR)
+
+  fs.writeFile(outputPath, render(employees), "utf8", (error) => {
+    if (error) {
+      return console.error(error)
+    }
+    console.log(`File saved in: ${outputPath}`)
+  })
+}
+
+/*
+  Create a folder under the project directory if it does not exist.
+ */
+function createFolder(path) {
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path)
+  }
 }
 
 const questions = {
@@ -91,7 +112,7 @@ const questions = {
         //  https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
         return answer.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
           true :
-          "Please provide a valide email address."
+          "Please provide a valid email address."
       }
     }
   ],
