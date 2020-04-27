@@ -12,8 +12,13 @@ const
 
 const render = require("./lib/htmlRenderer");
 
+let employees = []
 
 function init() {
+  promptEmployeeType()
+}
+
+function promptEmployeeType() {
   inquirer.prompt([
     {
       type: "list",
@@ -26,21 +31,42 @@ function init() {
       name: "employeeType"
     }
   ]).then(({employeeType}) => {
-    getEmployeeInfo(employeeType)
+    promptEmployeeInfo(employeeType)
   })
 }
 
 
-function getEmployeeInfo(employeeType) {
-  const prompts = questions["Common"]
+function promptEmployeeInfo(employeeType) {
+  const prompts = questions["Common"].slice()
   prompts.push(questions[employeeType])
 
   inquirer.prompt(prompts).then(response => {
       let employee = employeeBuilder[employeeType](response)
-      console.log(employee)
+      employees.push(employee)
+      promptContinue()
   })
 }
 
+
+function promptContinue() {
+  inquirer.prompt([
+    {
+      message: "Would you like to add another employee (y/n)?",
+      name: "addAnother",
+      validate: (answer) => {
+        return ['y', 'n', 'yes', 'no'].includes(answer.toLowerCase()) ?
+          true :
+          "Please answer yes or no."
+      }
+    }
+  ]).then(({addAnother}) => {
+    if (addAnother.includes('y')) {
+      promptEmployeeType()
+    } else {
+      console.log(employees)
+    }
+  })
+}
 
 const questions = {
   Common: [
@@ -50,11 +76,23 @@ const questions = {
     },
     {
       message: "What is the employee's ID number?",
-      name: "id"
+      name: "id",
+      validate: (answer) => {
+        return parseInt(answer) && answer >= 0 ?
+          true :
+          "The employee ID must be a positive integer."
+      }
     },
     {
       message: "What is the employee's email address?",
-      name: "email"
+      name: "email",
+      validate: (answer) => {
+        // Regex taken from:
+        //  https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
+        return answer.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
+          true :
+          "Please provide a valide email address."
+      }
     }
   ],
   Engineer: {
@@ -66,8 +104,14 @@ const questions = {
     name: "school"
   },
   Manager: {
+    type: "number",
     message: "What is the employee's office number?",
-    name: "officeNumber"
+    name: "officeNumber",
+    validate: (answer) => {
+      return parseInt(answer) && answer >= 0 ?
+        true :
+        "The office number must be a positive integer."
+    }
   }
 }
 
