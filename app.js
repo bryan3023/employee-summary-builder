@@ -1,7 +1,8 @@
 const
-  Manager = require("./lib/Manager"),
   Engineer = require("./lib/Engineer"),
   Intern = require("./lib/Intern"),
+  Manager = require("./lib/Manager"),
+  render = require("./lib/htmlRenderer"),
   inquirer = require("inquirer"),
   path = require("path"),
   fs = require("fs");
@@ -9,8 +10,6 @@ const
 const
   OUTPUT_DIR = path.resolve(__dirname, "output"),
   outputPath = path.join(OUTPUT_DIR, "team.html");
-
-const render = require("./lib/htmlRenderer");
 
 let employees = []
 
@@ -53,17 +52,12 @@ function promptContinue() {
     {
       message: "Would you like to add another employee (y/n)?",
       name: "addAnother",
-      validate: (answer) => {
-        return ['y', 'n', 'yes', 'no'].includes(answer.toLowerCase()) ?
-          true :
-          "Please answer yes or no."
-      }
+      validate: validateYesNo
     }
   ]).then(({addAnother}) => {
     if (addAnother.includes('y')) {
       promptEmployeeType()
     } else {
-      console.log(employees)
       saveTeamReport(employees)
     }
   })
@@ -89,54 +83,50 @@ function createFolder(path) {
   }
 }
 
+
+/*
+  Questions needed to create an employee.
+ */
 const questions = {
   Common: [
     {
       message: "What is the employee's name?",
-      name: "name"
+      name: "name",
+      validate: validateMinimal
     },
     {
       message: "What is the employee's ID number?",
       name: "id",
-      validate: (answer) => {
-        return parseInt(answer) && answer >= 0 ?
-          true :
-          "The employee ID must be a positive integer."
-      }
+      validate: validatePositiveNumber
     },
     {
       message: "What is the employee's email address?",
       name: "email",
-      validate: (answer) => {
-        // Regex taken from:
-        //  https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
-        return answer.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
-          true :
-          "Please provide a valid email address."
-      }
+      validate: validateEmailAddress
     }
   ],
   Engineer: {
     message: "What is the employee's Github username?",
-    name: "github"
+    name: "github",
+    validate: validateMinimal
   },
   Intern: {
     message: "What school is the employee from?",
-    name: "school"
+    name: "school",
+    validate: validateMinimal
   },
   Manager: {
     type: "number",
     message: "What is the employee's office number?",
     name: "officeNumber",
-    validate: (answer) => {
-      return parseInt(answer) && answer >= 0 ?
-        true :
-        "The office number must be a positive integer."
-    }
+    validate: validatePositiveNumber
   }
 }
 
 
+/*
+  Constructor lookup to create the appropriate employee type.
+ */
 const employeeBuilder = {
   Engineer({name, id, email, github}) {
     return new Engineer(name, id, email, github)
@@ -149,6 +139,46 @@ const employeeBuilder = {
   Manager({name, id, email, officeNumber}) {
     return new Manager(name, id, email, officeNumber)
   }
+}
+
+
+// -- Prompt input validation functions ---
+
+/*
+  Validate a yes or no answer.
+ */
+function validateYesNo(answer) {
+  return ['y', 'n', 'yes', 'no'].includes(answer.toLowerCase()) ?
+    true :
+    "Please answer yes or no."
+}
+
+
+/*
+  For more unstructured questions, validate the user at least entered something.
+ */
+function validateMinimal(answer) {
+  return answer.trim().length ? true : "Please provide an answer."
+}
+
+/*
+  Validate an integer of 0 or higher.
+ */
+function validatePositiveNumber(answer) {
+  return parseInt(answer) && answer >= 0 ?
+    true :
+    `Please provide a positive integer.`
+}
+
+
+/*
+  Validate an email address. Regex taken from:
+    https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
+ */
+function validateEmailAddress(answer) {
+  return answer.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
+    true :
+    "Please provide a valid email address."
 }
 
 // Write code to use inquirer to gather information about the development team members,
