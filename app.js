@@ -8,17 +8,17 @@ const
   fs = require("fs");
 
 const
+  employees = [],
   OUTPUT_DIR = path.resolve(__dirname, "output"),
   outputPath = path.join(OUTPUT_DIR, "team.html");
-
-let employees = []
 
 
 /*
   Program entry point.
  */
 function init() {
-  promptEmployeeType()
+  console.log("Please build your team.")
+  promptEmployeeInfo("Manager")
 }
 
 
@@ -33,7 +33,6 @@ function promptEmployeeType() {
       choices: [
         "Engineer",
         "Intern",
-        "Manager"
       ],
       name: "employeeType"
     }
@@ -48,8 +47,7 @@ function promptEmployeeType() {
   ask the user.
  */
 function promptEmployeeInfo(employeeType) {
-  const prompts = questions["Common"].slice()
-  prompts.push(questions[employeeType])
+  const prompts = getEmployeeQuestions(employeeType)
 
   inquirer.prompt(prompts).then(response => {
     const employee = employeeBuilder[employeeType](response)
@@ -106,41 +104,55 @@ function createFolder(path) {
 }
 
 
+function getEmployeeQuestions(employeeType) {
+  const prompts = questions["Common"].slice()
+  prompts.push(questions[employeeType])
+
+  return prompts.map(q => {
+    return {
+      name: q.name,
+      message: q.message.replace('{0}', employeeType.toLowerCase()),
+      validate: q.validate
+    }
+  })
+}
+
+
 /*
   Questions needed to create an employee.
  */
 const questions = {
   Common: [
     {
-      message: "What is the employee's name?",
+      message: "What is the {0}'s name?",
       name: "name",
       validate: validateMinimal
     },
     {
-      message: "What is the employee's ID number?",
+      message: "What is the {0}'s ID number?",
       name: "id",
-      validate: validatePositiveNumber
+      validate: validateId
     },
     {
-      message: "What is the employee's email address?",
+      message: "What is the {0}'s email address?",
       name: "email",
       validate: validateEmailAddress
     }
   ],
   Engineer: {
-    message: "What is the employee's Github username?",
+    message: "What is the engineer's Github username?",
     name: "github",
     validate: validateMinimal
   },
   Intern: {
-    message: "What school is the employee from?",
+    message: "What school is the intern from?",
     name: "school",
     validate: validateMinimal
   },
   Manager: {
-    message: "What is the employee's office number?",
+    message: "What is the manager's office number?",
     name: "officeNumber",
-    validate: validatePositiveNumber
+    validate: validateOfficeNumber
   }
 }
 
@@ -150,15 +162,15 @@ const questions = {
  */
 const employeeBuilder = {
   Engineer({name, id, email, github}) {
-    return new Engineer(name, id, email, github)
+    return new Engineer(name, parseInt(id), email, github)
   },
 
   Intern({name, id, email, school}) {
-    return new Intern(name, id, email, school)
+    return new Intern(name, parseInt(id), email, school)
   },
 
   Manager({name, id, email, officeNumber}) {
-    return new Manager(name, id, email, officeNumber)
+    return new Manager(name, parseInt(id), email, parseInt(officeNumber))
   }
 }
 
@@ -170,14 +182,30 @@ function validateMinimal(answer) {
   return answer.trim().length ? true : "Please provide an answer."
 }
 
+function validateOfficeNumber(answer) {  
+  return isUniquePositiveInteger(answer, "getOfficeNumber") ?
+    true :
+    "Please enter a unique, positive integer for the ID."
+}
+
+
+function validateId(answer) {
+  return isUniquePositiveInteger(answer, "getId") ?
+    true :
+    "Please enter a unique, positive integer for the ID."
+}
+
+
+function isUniquePositiveInteger(answer, method) {
+  const match = employees.filter(e => parseInt(answer) === e[method]())
+  return isPositiveInteger(answer) && 0 == match.length
+}
 
 /*
-  Validate an integer of 0 or higher.
+  Is answer an integer of 1 or higher?
  */
-function validatePositiveNumber(answer) {
-  return parseInt(answer) && answer >= 0 ?
-    true :
-    `Please provide a positive integer.`
+function isPositiveInteger(answer) {
+  return parseInt(answer) && answer > 0
 }
 
 
@@ -186,7 +214,7 @@ function validatePositiveNumber(answer) {
     https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
  */
 function validateEmailAddress(answer) {
-  return answer.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
+  return answer.toLowerCase().match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
     true :
     "Please provide a valid email address."
 }
