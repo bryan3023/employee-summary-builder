@@ -81,7 +81,7 @@ function promptEmployeeType() {
 
 
 /*
-  Reneder the report from the list of employees and save it under the
+  Render the report from the list of employees and save it under the
   output folder.
  */
 function saveTeamReport(employees) {
@@ -224,7 +224,7 @@ function validateId(answer) {
 /**
   Validate the answer is a unique integer within a set of objects
     @param {string} answer the answer returned from the prompt
-    @param {string} getter the getter method name for the property to
+    @param {string} getter the getter method name of the property to
       compare against
     @param {string} name the friendly name of the object property
  */
