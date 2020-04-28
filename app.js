@@ -1,3 +1,5 @@
+"use strict"
+
 const
   Engineer = require("./lib/Engineer"),
   Intern = require("./lib/Intern"),
@@ -23,33 +25,13 @@ function init() {
 
 
 /*
-  Ask what type of employee we should add.
- */
-function promptEmployeeType() {
-  inquirer.prompt([
-    {
-      type: "list",
-      message: "What type of employee would you like to add?",
-      choices: [
-        "Engineer",
-        "Intern",
-      ],
-      name: "employeeType"
-    }
-  ]).then(({employeeType}) => {
-    promptEmployeeInfo(employeeType)
-  })
-}
-
-
-/*
-  Create the list of questions for the specified employee type and then
-  ask the user.
+  Ask the user questions appropriate for the specified employee type.
  */
 function promptEmployeeInfo(employeeType) {
   const prompts = getEmployeeQuestions(employeeType)
 
   inquirer.prompt(prompts).then(response => {
+    response = sanitizeInput(response)
     const employee = employeeBuilder[employeeType](response)
     employees.push(employee)
     promptAddAnother()
@@ -58,8 +40,8 @@ function promptEmployeeInfo(employeeType) {
 
 
 /*
-  Ask if we should add another employee. If so, begin the question sequence
-  again. If not, save the report.
+  Ask if we should add another employee. If so, begin the question sequence.
+  If not, save the report.
  */
 function promptAddAnother() {
   inquirer.prompt([
@@ -74,6 +56,26 @@ function promptAddAnother() {
     } else {
       saveTeamReport(employees)
     }
+  })
+}
+
+
+/*
+  Ask what type of employee we should add.
+ */
+function promptEmployeeType() {
+  inquirer.prompt([
+    {
+      type: "list",
+      message: "What type of employee would you like to add?",
+      choices: [
+        "Engineer",
+        "Intern"
+      ],
+      name: "employeeType"
+    }
+  ]).then(({employeeType}) => {
+    promptEmployeeInfo(employeeType)
   })
 }
 
@@ -104,6 +106,9 @@ function createFolder(path) {
 }
 
 
+/*
+  Get a set of questions appropriate for the specified employee type.
+ */
 function getEmployeeQuestions(employeeType) {
   const prompts = questions["Common"].slice()
   prompts.push(questions[employeeType])
@@ -162,16 +167,33 @@ const questions = {
  */
 const employeeBuilder = {
   Engineer({name, id, email, github}) {
-    return new Engineer(name, parseInt(id), email, github)
+    return new Engineer(name, id, email, github)
   },
 
   Intern({name, id, email, school}) {
-    return new Intern(name, parseInt(id), email, school)
+    return new Intern(name, id, email, school)
   },
 
   Manager({name, id, email, officeNumber}) {
-    return new Manager(name, parseInt(id), email, parseInt(officeNumber))
+    return new Manager(name, id, email, officeNumber)
   }
+}
+
+
+/*
+  For prompt responses, ensure numbers are converted to integers and trim
+  whitespace around strings.
+ */
+function sanitizeInput(response) {
+  for (let item in response) {
+    const value = response[item]
+    if (parseInt(value)) {
+      response[item] = parseInt(value)
+    } else {
+      response[item] = value.trim()
+    }
+  }
+  return response
 }
 
 
@@ -183,22 +205,36 @@ function validateMinimal(answer) {
 }
 
 
+/*
+  Validate the office number is a unique integer.
+ */
 function validateOfficeNumber(answer) {  
   return validateUniquePositiveInteger(answer, "getOfficeNumber", "office number")
 }
 
 
+/*
+  Validate the ID is a unique integer.
+ */
 function validateId(answer) {
   return validateUniquePositiveInteger(answer, "getId", "ID")
 }
 
 
+/**
+  Validate the answer is a unique integer within a set of objects
+    @param {string} answer the answer returned from the prompt
+    @param {string} getter the getter method name for the property to
+      compare against
+    @param {string} name the friendly name of the object property
+ */
 function validateUniquePositiveInteger(answer, getter, name) {
   const match = employees.filter(e => parseInt(answer) === e[getter]())
   return isPositiveInteger(answer) && 0 === match.length ?
     true :
     `Please enter a unique, positive integer for the ${name}.`
 }
+
 
 /*
   Is answer an integer of 1 or higher?
@@ -219,9 +255,14 @@ function validateEmailAddress(answer) {
     "Please provide a unique, valid email address."
 }
 
+
+/*
+  Is the email address unique among the set of existing employees?
+ */
 function isUniqueEmailAddress(answer) {
   const match = employees.filter(e => answer == e.getEmail())
   return 0 === match.length
 }
+
 
 init();
