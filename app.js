@@ -182,23 +182,22 @@ function validateMinimal(answer) {
   return answer.trim().length ? true : "Please provide an answer."
 }
 
+
 function validateOfficeNumber(answer) {  
-  return isUniquePositiveInteger(answer, "getOfficeNumber") ?
-    true :
-    "Please enter a unique, positive integer for the ID."
+  return validateUniquePositiveInteger(answer, "getOfficeNumber", "office number")
 }
 
 
 function validateId(answer) {
-  return isUniquePositiveInteger(answer, "getId") ?
-    true :
-    "Please enter a unique, positive integer for the ID."
+  return validateUniquePositiveInteger(answer, "getId", "ID")
 }
 
 
-function isUniquePositiveInteger(answer, method) {
-  const match = employees.filter(e => parseInt(answer) === e[method]())
-  return isPositiveInteger(answer) && 0 == match.length
+function validateUniquePositiveInteger(answer, getter, name) {
+  const match = employees.filter(e => parseInt(answer) === e[getter]())
+  return isPositiveInteger(answer) && 0 === match.length ?
+    true :
+    `Please enter a unique, positive integer for the ${name}.`
 }
 
 /*
@@ -214,10 +213,15 @@ function isPositiveInteger(answer) {
     https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
  */
 function validateEmailAddress(answer) {
-  return answer.toLowerCase().match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ?
+  const match = answer.toLowerCase().match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/)
+  return match && isUniqueEmailAddress(answer) ?
     true :
-    "Please provide a valid email address."
+    "Please provide a unique, valid email address."
 }
 
+function isUniqueEmailAddress(answer) {
+  const match = employees.filter(e => answer == e.getEmail())
+  return 0 === match.length
+}
 
 init();
