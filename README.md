@@ -13,7 +13,7 @@ This program validates input. Specifically:
 * For each employee, ID numbers, office numbers, and email addresses must be unique.
 * ID numbers and office numbers must be positive integers.
 * Email addresses must be in a correct format.
-* Name, githubusername, and school name must not be blank.
+* Name, GitHub username, and school name must not be blank.
 
 [Watch it in action.](https://drive.google.com/file/d/1pNqjO14d4_NQ3DCc0DIycJkoI5roicMR/view)
 
