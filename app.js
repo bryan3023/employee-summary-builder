@@ -249,7 +249,11 @@ function isPositiveInteger(answer) {
     https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute
  */
 function validateEmailAddress(answer) {
-  const match = answer.toLowerCase().match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/)
+  const match = answer
+    .trim()
+    .toLowerCase()
+    .match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/)
+
   return match && isUniqueEmailAddress(answer) ?
     true :
     "Please provide a unique, valid email address."
