@@ -240,7 +240,8 @@ function validateUniquePositiveInteger(answer, getter, name) {
   Is answer an integer of 1 or higher?
  */
 function isPositiveInteger(answer) {
-  return parseInt(answer) && answer > 0
+  const answerInt = parseInt(answer)
+  return answerInt && answerInt > 0
 }
 
 
@@ -264,7 +265,7 @@ function validateEmailAddress(answer) {
   Is the email address unique among the set of existing employees?
  */
 function isUniqueEmailAddress(answer) {
-  const match = employees.filter(e => answer == e.getEmail())
+  const match = employees.filter(e => answer.trim() == e.getEmail())
   return 0 === match.length
 }
 
