@@ -229,7 +229,10 @@ function validateId(answer) {
     @param {string} name the friendly name of the object property
  */
 function validateUniquePositiveInteger(answer, getter, name) {
-  const match = employees.filter(e => parseInt(answer) === e[getter]())
+  const match = employees.filter(e =>
+    getter in e ? parseInt(answer) === e[getter]() : false
+  )
+
   return isPositiveInteger(answer) && 0 === match.length ?
     true :
     `Please enter a unique, positive integer for the ${name}.`
