@@ -268,7 +268,7 @@ function validateEmailAddress(answer) {
   Is the email address unique among the set of existing employees?
  */
 function isUniqueEmailAddress(answer) {
-  const match = employees.filter(e => answer.trim() == e.getEmail())
+  const match = employees.filter(e => answer.trim() === e.getEmail())
   return 0 === match.length
 }
 
