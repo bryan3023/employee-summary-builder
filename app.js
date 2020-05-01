@@ -252,8 +252,8 @@ function isPositiveInteger(answer) {
   Does the string have only digits - i.e., no trailing text, decimal, or exponent?
  */
 function isIntegerString(numberString) {
-  const digitsOnly = numberString.trim().match(/^\d$/) ? true : false
-  return digitsOnly
+  const hasDigitsOnly = numberString.trim().match(/^\d+$/) ? true : false
+  return hasDigitsOnly
 }
 
 
