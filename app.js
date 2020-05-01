@@ -190,10 +190,24 @@ function sanitizeInput(response) {
     if (parseInt(value)) {
       response[item] = parseInt(value)
     } else {
-      response[item] = value.trim()
+      response[item] = escapeHtml(value.trim())
     }
   }
   return response
+}
+
+
+/*
+  Escape key HTML characters to prevent malicious markup from being injected.
+  Probably a bit out of scope for this exercise, but good practice for when
+  we move input from inquirer to a front end / API interface.
+ */
+function escapeHtml(text) {
+  return text.replace(/&/g,'&#38;')
+    .replace(/</g,'&#60;')
+    .replace(/>/g,'&#62;')
+    .replace(/\"/g, '&#39;')
+    .replace(/\'/g, '&#34;')
 }
 
 
