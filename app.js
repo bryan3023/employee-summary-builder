@@ -243,13 +243,12 @@ function validateUniquePositiveInteger(answer, getter, name) {
   Is answer an integer of 1 or higher?
  */
 function isPositiveInteger(answer) {
-  const answerInt = parseInt(answer)
-  return isIntegerString(answer) && answerInt && answerInt > 0
+  return isIntegerString(answer) && parseInt(answer) > 0
 }
 
 
 /*
-  Does the string have only digits - i.e., no trailing text, decimal, or exponent?
+  Does the string have only digits - i.e., no decimal, exponent, trailing text?
  */
 function isIntegerString(numberString) {
   const hasDigitsOnly = numberString.trim().match(/^\d+$/) ? true : false
